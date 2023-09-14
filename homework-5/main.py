@@ -42,26 +42,48 @@ def main():
 
 def create_database(params, db_name) -> None:
     """Создает новую базу данных."""
-    pass
+    conn = psycopg2.connect(dbname='postgres', **params)
+    cur = conn.cursor()
+
+    cur.execute(f'DROP DATABASE {db_name}')
+    cur.execute(f'CREATE DATABASE {db_name}')
+    conn.close()
+
 
 def execute_sql_script(cur, script_file) -> None:
     """Выполняет скрипт из файла для заполнения БД данными."""
-
+    cur.execute(script_file)
 
 
 def create_suppliers_table(cur) -> None:
     """Создает таблицу suppliers."""
-    pass
+    cur.execute("""
+           CREATE TABLE suppliers (
+               company_name VARCHAR(60),
+               contact VARCHAR(200),
+               address VARCHAR(200),
+               phone VARCHAR,
+               fax VARCHAR,
+               homepage VARCHAR,
+               products VARCHAR
+           )
+       """)
 
 
 def get_suppliers_data(json_file: str) -> list[dict]:
     """Извлекает данные о поставщиках из JSON-файла и возвращает список словарей с соответствующей информацией."""
-    pass
+    with open(json_file, 'r') as file:
+        json_data = json.loads(file)
+        return json_data
 
 
 def insert_suppliers_data(cur, suppliers: list[dict]) -> None:
     """Добавляет данные из suppliers в таблицу suppliers."""
-    pass
+
+    cur.execute(f"INSERT INTO suppliers VALUES (%s, %s, %s, %s, %s,  %s, %s)", (suppliers['company_name'], suppliers['contact'],
+                                                                                suppliers['address'], suppliers['phone'],
+                                                                                suppliers['fax'], suppliers['homepage'],
+                                                                                suppliers['products']))
 
 
 def add_foreign_keys(cur, json_file) -> None:
